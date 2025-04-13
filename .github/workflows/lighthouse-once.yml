@@ -1,0 +1,38 @@
+name: One-Time Lighthouse Audit
+
+on:
+  workflow_dispatch:  # Only runs manually
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Lighthouse
+        run: npm install -g lighthouse
+
+      - name: Run Lighthouse audit
+        run: |
+          mkdir -p reports
+          lighthouse https://moh.gov.et \
+            --output json \
+            --output-path=reports/moh-audit.json \
+            --only-categories=accessibility \
+            --chrome-flags="--headless"
+
+      - name: Commit report
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add reports/
+          git commit -m "Add one-time Lighthouse audit report"
+          git push
+Add one-time accessibility audit workflow
